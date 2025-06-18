@@ -1,231 +1,50 @@
-Git integration (GitHub, GitLab, Bitbucket)
-===========================================
-
-Your Read the Docs account can be connected to your Git provider's account.
-Connecting your account provides the following features:
-
-🔑️ Easy login
-  Log in to Read the Docs with your |git_providers_or| account.
-
-🔁️ List your projects
-  Select a project to automatically import from all your Git repositories and organizations.
-  See: :doc:`/intro/add-project`.
-
-⚙️ Automatic configuration
-  Have your Git repository automatically configured with your Read the Docs :term:`webhook`,
-  which allows Read the Docs to build your docs on every change to your repository.
-
-🚥️ Commit status
-  See your documentation build status as a commit status indicator on :doc:`pull request builds </pull-requests>`.
-
-.. seealso::
-
-   :ref:`intro/add-project:Manually add your project`
-     Using a different provider? You can configure it manually.
-     Read the Docs still supports other providers such as Gitea or GitHub Enterprise.
-
-Getting started
----------------
-
-✅️ Signed up with your Git provider?
-  If you signed up or logged in to Read the Docs with your |git_providers_or|
-  credentials, you're all done. Your account is connected.
-
-  The rest of this guide explains how the automatic configuration works.
-
-⏩️️ Signed up with your email address?
-  If you have signed up to Read the Docs with your email address,
-  you can add the connection to the Git provider afterward.
-  You can also add a connection to an additional Git provider this way.
-
-  Please follow :doc:`/guides/connecting-git-account` in this case.
-
-Once you have your account connected,
-you can follow the :doc:`/intro/add-project` guide to actually add your project to Read the Docs.
-
-How automatic configuration works
----------------------------------
-
-When your Read the Docs account is connected to |git_providers_or| and you :doc:`add a new Read the Docs project </intro/add-project>`:
-
-* Read the Docs automatically creates a Read the Docs Integration that matches your Git provider.
-* Read the Docs creates an incoming webhook with your Git provider, which is automatically added to your Git repository's settings using the account connection.
-
-After project creation,
-you can continue to configure the project.
-All settings can be modified,
-including the ones that were automatically created.
-
-.. tip::
-
-   A single Read the Docs account can connect to many different Git providers.
-   This allows you to have a single login for all your various identities.
-
-Read the Docs incoming webhook
-------------------------------
-
-Accounts with |git_providers_and| integration automatically have Read the Docs' incoming :term:`webhook` configured on all Git repositories that are imported.
-Other setups can set up the webhook through :doc:`manual configuration </guides/setup/git-repo-manual>`.
-
-When an incoming webhook notification is received,
-Read the Docs ensures that it matches an existing project.
-Once the webhook is validated,
-an action is taken based on the information inside of the webhook.
-
-Possible webhook action outcomes are:
-
-* :doc:`Builds </builds>` the latest commit.
-* Synchronizes your versions based on the latest tag and branch data in Git.
-* Creates a :doc:`pull request build </pull-requests>`.
-* Runs your :doc:`automation rules</automation-rules>`.
-
-.. figure:: /img/screenshot-webhook.png
-   :alt: Screenshot of the Dashboard view for the incoming webhook
-
-   All calls to the incoming webhook are logged.
-   Each call can trigger builds and version synchronization.
-
-On |com_brand|,
-Git integration makes it possible for us to synchronize your Git repository's access rights from your Git provider.
-That way, the same access rights are effective on Read the Docs and you don't have to configure access in two places.
-See more in our :ref:`sso_git_provider`.
-
-How does the connection work?
------------------------------
-
-Read the Docs uses `OAuth`_ to connect to your account at |git_providers_or|.
-You are asked to grant permissions for Read the Docs to perform a number of actions on your behalf.
-
-At the same time, we use this process for authentication (login)
-since we trust that |git_providers_or| have verified your user account and email address.
-
-By granting Read the Docs the requested permissions,
-we are issued a secret OAuth token from your Git provider.
-Using the secret token,
-we can automatically configure repositories during :doc:`project creation </intro/add-project>`.
-We also use the token to send back build statuses and preview URLs for :doc:`pull requests </pull-requests>`.
-
-.. _OAuth: https://en.wikipedia.org/wiki/OAuth
-
-.. note::
-
-  Access granted to Read the Docs can always be revoked.
-  This is a function offered by all Git providers.
-
-Git provider integrations
--------------------------
-
-If your project is using :doc:`Organizations </commercial/organizations>` (|com_brand|) or :term:`maintainers <maintainer>` (|org_brand|),
-then you need to be aware of *who* is setting up the integration for the project.
-
-The Read the Docs user who sets up the project through the automatic import should also have admin rights to the Git repository.
-
-A Git provider integration is active through the authentication of the user that creates the integration.
-If this user is removed,
-make sure to verify and potentially recreate all Git integrations for the project.
-
-Permissions for connected accounts
-----------------------------------
-
-Read the Docs does not generally ask for *write* permission to your repository code
-(with one exception detailed below).
-However, we do need permissions for authorizing your account
-so that you can log in to Read the Docs with your connected account credentials.
-
-.. tabs::
-
-   .. tab:: GitHub
-
-      Read the Docs requests the following permissions (more precisely, `OAuth scopes`_)
-      when connecting your Read the Docs account to GitHub.
-
-      .. _OAuth scopes: https://developer.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/
-
-      Read access to your email address (``user:email``)
-          We ask for this so you can create a Read the Docs account and log in with your GitHub credentials.
-
-      Administering webhooks (``admin:repo_hook``)
-          We ask for this so we can create :term:`webhooks <webhook>` on your repositories when you import them into Read the Docs.
-          This allows us to build the docs when you push new commits.
-
-      Read access to your organizations (``read:org``)
-          We ask for this so we know which organizations you have access to.
-          This allows you to filter repositories by organization when importing repositories.
-
-      Repository status (``repo:status``)
-          Repository statuses allow Read the Docs to report the status
-          (e.g. passed, failed, pending) of pull requests to GitHub.
-
-      .. note::
-
-          :doc:`Read the Docs for Business </commercial/index>`
-          asks for one additional permission (``repo``) to allow access to private repositories
-          and to allow us to set up SSH keys to clone your private repositories.
-          Unfortunately, this is the permission for read/write control of the repository
-          but there isn't a more granular permission
-          that only allows setting up SSH keys for read access.
-
-   .. tab:: Bitbucket
-
-      We request permissions for:
-
-      Administering your repositories (``repository:admin``)
-        We ask for this so we can create :term:`webhooks <webhook>` on your repositories when you import them into Read the Docs.
-        This allows us to build the docs when you push new commits.
-        NB! This permission scope does **not** include any write access to code.
-
-      Reading your account information including your email address
-        We ask for this so you can create a Read the Docs account and log in with your Bitbucket credentials.
-
-      Read access to your team memberships
-        We ask for this so we know which organizations you have access to.
-        This allows you to filter repositories by organization when importing repositories.
-
-      Read access to your repositories
-        We ask for this so we know which repositories you have access to.
-
-      To read more about Bitbucket permissions, see `official Bitbucket documentation on API scopes`_
-
-      .. _official Bitbucket documentation on API scopes: https://developer.atlassian.com/cloud/bitbucket/bitbucket-cloud-rest-api-scopes/
-
-
-   .. tab:: GitLab
-
-      Like the others, we request permissions for:
-
-      * Reading your account information (``read_user``)
-      * API access (``api``) which is needed to create webhooks in GitLab
-
-
-.. _github-permission-troubleshooting:
-
-GitHub permission troubleshooting
----------------------------------
-
-**Repositories not in your list to import**.
-
-Many organizations require approval for each OAuth application that is used,
-or you might have disabled it in the past for your personal account.
-This can happen at the personal or organization level,
-depending on where the project you are trying to access has permissions from.
-
-.. tabs::
-
-   .. tab:: Personal Account
-
-      You need to make sure that you have granted access to the Read the Docs `OAuth App`_ to your **personal GitHub account**.
-      If you do not see Read the Docs in the `OAuth App`_ settings, you might need to disconnect and reconnect the GitHub service.
-
-      .. seealso:: GitHub docs on `requesting access to your personal OAuth`_ for step-by-step instructions.
-
-      .. _OAuth App: https://github.com/settings/applications
-      .. _requesting access to your personal OAuth: https://docs.github.com/en/organizations/restricting-access-to-your-organizations-data/approving-oauth-apps-for-your-organization
-
-   .. tab:: Organization Account
-
-      You need to make sure that you have granted access to the Read the Docs OAuth App to your **organization GitHub account**.
-      If you don't see "Read the Docs" listed, then you might need to connect GitHub to your social accounts as noted above.
-
-      .. seealso:: GitHub doc on `requesting access to your organization OAuth`_ for step-by-step instructions.
-
-      .. _requesting access to your organization OAuth: https://docs.github.com/en/github/setting-up-and-managing-your-github-user-account/managing-your-membership-in-organizations/requesting-organization-approval-for-oauth-apps
+AOL Customer 1 (805) 301-7609 or 1-803-384-3054 Service Phone Number a pioneer in the internet and email services industry, continues to serve millions of users worldwide. However, like all technological platforms, users sometimes face issues with their AOL accounts—ranging from login problems to spam concerns, password recovery, or email sending and receiving errors. When problems arise, you need quick and reliable support. This is where the AOL customer service phone number comes in handy. Whether you're experiencing a technical glitch or need assistance with account management, AOL's customer service is available to guide you through solutions step-by-step.
+Why You Might Need AOL Customer Service
+There are several reasons why users reach out to AOL’s support team. Here are some of the most common issues:
+1. Login and Password Issues
+One of the top concerns among AOL users is login trouble. Whether you’ve forgotten your password or your account has been locked due to suspicious activity, AOL customer service can assist you in resetting your credentials and securing your account.
+2. Account Hacked or Compromised
+If you suspect unauthorized activity on your AOL account, it's essential to act quickly. AOL support will help you recover your account, change your password, and ensure all suspicious devices are removed.
+3. Email Sending/Receiving Errors
+Are your emails bouncing back or not getting delivered at all? AOL’s support team can help resolve issues related to server settings, attachments, or filters that may be blocking messages.
+4. Spam and Junk Mail Issues
+Unwanted spam emails are more than just an annoyance—they can also be dangerous. AOL’s support team can show you how to fine-tune your spam filter settings and report malicious emails.
+5. Billing and Subscription Queries
+If you are using any of AOL’s premium services and have questions about charges, renewals, or cancellations, calling the customer service number is the most direct way to resolve them.
+The AOL Customer Service Phone Number
+To address any of these concerns or others, you can contact AOL’s dedicated customer support via phone. The official AOL customer service 1 (805) 301-7609 or 1-803-384-3054 phone number is available for both technical and non-technical issues. Their agents are trained to offer assistance with:
+•	Troubleshooting technical problems
+•	Guiding you through account recovery
+•	Resolving email-related errors
+•	Helping with AOL subscriptions and premium services
+Make sure to have your account information ready, such as your username and the last four digits of your billing method (if applicable), to verify your identity quickly when calling.
+Tip: Always ensure you are calling the correct and official number to avoid scams. Visit the official AOL Help website for the most up-to-date contact details.
+AOL Customer Service: Available 24/7
+One of the biggest advantages of AOL customer support is its 24/7 availability. Whether it's a weekend, late at night, or early in the morning, AOL agents are always on standby to help resolve your queries. This round-the-clock support ensures that users across different time zones are never left stranded.
+Additional Ways to Get AOL Support
+In addition to the customer service phone number, AOL offers multiple ways to get help:
+1. Online Help Center
+The AOL Help website is a treasure trove of articles, FAQs, and troubleshooting guides. You can search for your issue and find step-by-step instructions without waiting in line.
+2. Live Chat Support
+For users who prefer typing over talking, AOL also offers live chat support. It's a great option when you need help but can’t make a phone call.
+3. Community Forums
+AOL hosts user community forums where experienced users and moderators share solutions to common problems. This is a useful resource for non-urgent issues.
+4. Social Media Assistance
+AOL has an active presence on platforms like Twitter and Facebook, where users can message them for assistance or read updates about any ongoing service outages.
+How to Prepare Before Calling AOL Customer Service
+To make your interaction with AOL customer support as smooth as possible, consider the following tips:
+•	Be ready with account information: This helps verify your identity quickly.
+•	Clearly describe your issue: Mention what the problem is, when it started, and any steps you’ve already taken.
+•	Write down error messages: If you’re receiving any on-screen errors, noting them down will help the agent understand the issue better.
+•	Have a pen and paper ready: You may need to note down reference numbers, instructions, or other information shared during the call.
+Conclusion
+AOL remains a reliable and accessible email service, but occasional technical issues are part of the digital experience. Whether it’s a login error, security concern, or subscription question, having access to the AOL customer service 1 (805) 301-7609 or 1-803-384-3054 phone number ensures you're never left without support. By calling their helpline, users get direct assistance from trained professionals who are available 24/7. Along with their phone support, AOL also offers online resources, live chat, and community forums—making it easy for users to resolve issues in the way that suits them best. Don't let technical problems disrupt your communication—reach out to AOL customer service and get the help you need, when you need it
+FAQs
+Q1: What is the AOL customer service phone number?
+A: The phone number may vary by region or service level. It’s best to visit the official AOL Help page for the latest contact number.
+Q2: Is AOL customer service available 24/7?
+A: Yes, AOL offers round-the-clock phone support for most technical and account-related issues.
+Q3: Can I recover my AOL account through customer service?
+A: Absolutely. AOL support can help you recover a hacked or inaccessible account after verifying your identity.
+Q4: Is there a live chat option for AOL support?
+A: Yes, AOL offers live chat as an alternative to phone support for various issues.
